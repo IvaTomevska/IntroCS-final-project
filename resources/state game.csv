@@ -1,2 +1,4 @@
- Hero,50,0,50,resources/hero.png,500
- Enemy,350,0,50,resources/enemy.png,500
+ Hero,50,0,50,resources\\hero.png,0
+ Enemy,350,0,50,resources\\enemy.png,0
+ Platform,50,450,300,100,resources\\platform.png
+ Platform,200,250,300,100,resources\\platform.png

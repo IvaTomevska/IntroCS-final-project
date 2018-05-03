@@ -6,9 +6,9 @@ class Game:
     def __init__(self):
         self.w=500
         self.h=700
-        self.g=700
-        self.platforms=[]
+        self.g=0
         self.state='start'
+        self.platforms=[]
         
     def create(self):
         self.enemies=[]
@@ -16,12 +16,16 @@ class Game:
         for item in resources:
             item = item.strip().split(",")
             if item[0] == 'Hero':
+                #x,y,r,path,g
                 self.hero = Hero(int(item[1]),int(item[2]),int(item[3]),item[4],int(item[5]))
             elif item[0] == 'Enemy':
                 self.enemies.append(Enemy(int(item[1]),int(item[2]),int(item[3]),item[4],int(item[5])))
+            elif item[0] == 'Platform':
+                #x,y,w,h,path
+                self.platforms.append(Platform(int(item[1]),int(item[2]),int(item[3]),int(item[4]),item[5]))
         resources.close()
         
-        self.platforms.append(Platform(200,450,200,52,'resources\\platform3.png'))        
+        #self.platforms.append(Platform(200,250,300,100,'resources\\platform.png')) 
         
     def display(self):
         for e in self.enemies:
@@ -30,7 +34,6 @@ class Game:
         
         for p in self.platforms:
             p.display()
-        
         
 class Npc:
     def __init__(self,x,y,r,imgName,g):
@@ -47,26 +50,26 @@ class Npc:
     
     def display(self):
         #how to make it different for hero and enemies
-        image(self.img,self.x-self.r,game.h+self.y-self.h,self.w,self.h,)
+        image(self.img,self.x-self.r,game.h-self.y-self.h,self.w,self.h,)
         self.update()
     
         
     def gravity(self):
-        if game.h+self.y < self.g:
-            self.yv+=0.1
-            
-            if self.y+self.r+self.yv > game.w:
-                self.vy = self.g-self.y-self.r
+        if self.y > self.g:
+            self.yv-=0.1
+            if self.y + self.yv < self.g:
+                self.yv = self.g -self.y
+
         else:
             self.yv=0
             self.jump=0
             
         for p in game.platforms:
-            if self.x+self.r >= p.x and self.x-self.r <= p.x+p.w and self.y+self.r <= p.y : 
+            if self.x+self.r >= p.x and self.x-self.r <= p.x+p.w and self.y >= p.y : 
                 self.g = p.y
                 break
             else:
-                self.g=game.h
+                self.g=game.g
             
         
 class Hero(Npc):
@@ -84,34 +87,41 @@ class Hero(Npc):
         else:
             self.xv=0
         if (self.keyHandler[UP] or self.keyHandler[87] or self.keyHandler[32]) and self.yv >= 0 and self.jump<1:
-            self.yv=-7
+            self.yv=+7.5
             self.jump+=1
             
         else:
-         #   self.xv=0
             self.xy=0
             
         self.x+=self.xv    
-        self.y+=self.yv     
+        self.y+=self.yv  
         
-        # if self.y <= game.h//2:
-        #      game.y += self.yv   
-        
-    # collision
+        # collision
         for e in game.enemies:
             if self.distance(e) < self.r+e.r:
-                if self.y < e.y and self.yv > 0:
+                #-self.r so that enemy won't be killed if hit in the lower half
+                if self.y-self.r > e.y and self.yv < 0:
                     game.enemies.remove(e)
                     del e
-                    self.vy = -4
+                    self.vy = 4
                 else:
                     game.__init__()
                     game.create()
 
                     
     def distance(self,enemy):
-        return ((self.x-enemy.x)**2+(self.y-enemy.y)**2)**0.5
+        return ((self.x-enemy.x)**2+(self.y-enemy.y)**2)**0.5        
+        
+class Platform:
+    def __init__(self,x,y,w,h,img):
+        self.x=x
+        self.y=y
+        self.w=w
+        self.h=h
+        self.img=loadImage(path+'\\'+img)
     
+    def display(self):
+        image(self.img,self.x,game.h-self.y)
         
 class Enemy(Npc):
     def __init__(self,x,y,r,imgName,g):
@@ -127,18 +137,6 @@ class Enemy(Npc):
         self.x+=self.xv
         self.y+=self.yv
         
-        
-class Platform:
-    def __init__(self,x,y,w,h,img):
-        self.x=x
-        self.y=y
-        self.w=w
-        self.h=h
-        self.img=loadImage(path+'\\'+img)
-    
-    def display(self):
-        image(self.img,self.x,self.y)
-        
     
 game=Game()
 
@@ -150,6 +148,7 @@ def setup():
 def draw():
     textSize(40)
     if game.state=='start':
+        background(0)
         if game.w//2.8<=mouseX<=game.w//2.8+130 and game.h//2-40<=mouseY<=game.h//2:
             fill(255,255,100)
         else:    
@@ -158,7 +157,7 @@ def draw():
     if game.state=='game':
         background(0)
         game.display()
-        print(game.hero.y)
+
 
 def mouseClicked():
     if game.state=='start' \
