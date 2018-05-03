@@ -1,0 +1,11 @@
+Docimentation
+
+On the start play game should be pressed with the right click on the mouse.
+The jump keys are Space, Up and W.
+The movig left keys are Left and A, for right are right and D.
+The Collision of the hero and the enemy is working: 
+  the enemy looses and is deleted from the screen when the hero jumps on top of him
+  the hero looses when he touches the enemy from the side and the game terminates
+One platform so far is implemented succesfullt and the gravity on the platform works
+However, when the hero is under the platform the gravity doesn't work, it should be fixed
+Also, the gravity works but there are some problems, it should be completely redone.
