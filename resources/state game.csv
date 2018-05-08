@@ -2,7 +2,13 @@
  Hero,50,0,50,resources\\hero.png,0
  Enemy,400,251,50,resources\\enemy.png,0
  Enemy,150,451,50,resources\\enemy.png,0
+ Enemy,350,0,50,resources\\enemy.png,0
 ,x,y,w,h,picture
  Platform,200,600,300,100,resources\\platform.png
  Platform,50,450,300,100,resources\\platform.png
  Platform,400,250,300,100,resources\\platform.png
+ Platform,400,800,300,100,resources\\platform.png
+ Platform,500,650,300,100,resources\\platform.png
+ Platform,50,450,300,100,resources\\platform.png
+ Platform,300,250,300,100,resources\\platform.png 
+ End,2000,,,,
