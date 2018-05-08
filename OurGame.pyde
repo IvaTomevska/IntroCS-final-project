@@ -1,4 +1,4 @@
-import os
+import os, random
 
 path=os.getcwd()
 
@@ -31,12 +31,13 @@ class Game:
         #self.platforms.append(Platform(200,250,300,100,'resources\\platform.png')) 
         
     def display(self):
+        for p in self.platforms:
+            p.display()
+            
         for e in self.enemies:
             e.display()
         self.hero.display()
         
-        for p in self.platforms:
-            p.display()
             
         if self.hero.y>2:#fix here for start of coutdown of time
             self.cnt  = (self.cnt + 1)%60
@@ -145,10 +146,14 @@ class Enemy(Npc):
         self.xv = 2        
         
     def update(self):
-        if self.x+self.r >= game.w: 
-            self.xv=-2
-        elif self.x-self.r <= 0: 
-            self.xv=2
+        for p in game.platforms:
+            if self.y==p.y+1:
+                if self.x+self.r >= p.x+p.w:
+                    self.xv=-2
+                elif self.x-self.r <= p.x: 
+                    self.xv=2
+        
+    
         
         self.x+=self.xv
         self.y+=self.yv
