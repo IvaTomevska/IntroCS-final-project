@@ -1,6 +1,9 @@
-import os, random
+add_library('minim')
+
+import os
 
 path=os.getcwd()
+minim=Minim(this);
 
 class Game:
     def __init__(self):
@@ -11,7 +14,6 @@ class Game:
         self.platforms=[]
         self.scoretime = 10
         self.cnt = 0
-        #self.time = 5
         
     def create(self):
         self.enemies=[]
@@ -29,6 +31,10 @@ class Game:
             elif item[0]=='End':
                 self.stage_y_end = int(item[1])
         resources.close()
+        
+        self.soundtrack=minim.loadFile (path+"\\resources\\Soundtrack.mp3",2048)
+        self.soundtrack.play() 
+        self.bgmusic=minim.loadFile (path+"\\resources\\Background.mp3",2048)
     
         
     def display(self):
@@ -40,7 +46,7 @@ class Game:
         self.hero.display()
         
             
-        if self.hero.y>2:#fix here for start of coutdown of time
+        if self.hero.y>500:#fix here for start of coutdown of time
             self.cnt  = (self.cnt + 1)%60
             if self.cnt == 0:
                 self.scoretime-=1
@@ -73,10 +79,9 @@ class Npc:
         
     def gravity(self):
         if self.y > self.g:
-            self.yv-=0.1
+            self.yv-=0.2
             if self.y + self.yv < self.g:
                 self.yv = self.g -self.y
-
         else:
             self.yv=0
             self.jump=0
@@ -104,7 +109,7 @@ class Hero(Npc):
         else:
             self.xv=0
         if (self.keyHandler[UP] or self.keyHandler[87] or self.keyHandler[32]) and self.yv >= 0 and self.jump<1:
-            self.yv=+7.5
+            self.yv=+10
             self.jump+=1
             
         else:
@@ -114,14 +119,32 @@ class Hero(Npc):
         self.y+=self.yv  
         
         # collision
+        ctr=0
         for e in game.enemies:
             if self.distance(e) < self.r+e.r:
-                #-self.r so that enemy won't be killed if hit in the lower half
+            #-self.r so that enemy won't be killed if hit in the lower half
+                # if e.img=="vader.png":
+                #     if self.y-self.r > e.y and self.yv < 0:
+                #         while ctr!=3:
+                #             self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
+                #             self.killsound.play()
+                #             game.enemies.remove(e)
+                #             self.yv = 5
+                #             game.enemies.image(e)
+                #             crt+=1
+                #         del e
+                #     else:
+                #         game.__init__()
+                #         game.create()
+                        
                 if self.y-self.r > e.y and self.yv < 0:
+                    self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
+                    self.killsound.play()
                     game.enemies.remove(e)
                     del e
-                    self.vy = 4
+                    self.yv = 5
                     game.scoretime += 10
+
                 else:
                     game.__init__()
                     game.create()
@@ -151,18 +174,20 @@ class Enemy(Npc):
         self.xv = 2        
         
     def update(self):
+        if self.x+self.r >= game.w:
+            self.xv=-2
+        elif self.x-self.r <= 0: 
+            self.xv=2
         for p in game.platforms:
             if self.y==p.y+1:
                 if self.x+self.r >= p.x+p.w:
                     self.xv=-2
                 elif self.x-self.r <= p.x: 
                     self.xv=2
-        
-    
-        
+
         self.x+=self.xv
         self.y+=self.yv
-        
+                  
     
 game=Game()
 
@@ -181,6 +206,8 @@ def draw():
             fill(255,255,0)
         text('START',game.w//2.8,game.h//2)
     if game.state=='game':
+        game.soundtrack.pause()
+        game.bgmusic.play()
         background(0)
         game.display()
 
