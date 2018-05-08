@@ -26,9 +26,10 @@ class Game:
             elif item[0] == 'Platform':
                 #x,y,w,h,path
                 self.platforms.append(Platform(int(item[1]),int(item[2]),int(item[3]),int(item[4]),item[5]))
+            elif item[0]=='End':
+                self.stage_y_end = int(item[1])
         resources.close()
-        
-        #self.platforms.append(Platform(200,250,300,100,'resources\\platform.png')) 
+    
         
     def display(self):
         for e in self.enemies:
@@ -123,6 +124,10 @@ class Hero(Npc):
                 else:
                     game.__init__()
                     game.create()
+                    
+        "moving in the middle"            
+        if self.y >= game.h//2 and self.y < game.stage_y_end-game.h//2:
+            game.h += self.yv
 
                     
     def distance(self,enemy):
