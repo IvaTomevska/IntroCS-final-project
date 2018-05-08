@@ -14,6 +14,9 @@ class Game:
         self.platforms=[]
         self.scoretime = 10
         self.cnt = 0
+        self.vader = 3 # how many time before Vader is killed
+        self.vaderPush = False
+        self.cntVader = 0
         
     def create(self):
         self.enemies=[]
@@ -24,7 +27,7 @@ class Game:
                 #x,y,r,path,g
                 self.hero = Hero(int(item[1]),int(item[2]),int(item[3]),item[4],int(item[5]))
             elif item[0] == 'Enemy':
-                self.enemies.append(Enemy(int(item[1]),int(item[2]),int(item[3]),item[4],int(item[5])))
+                self.enemies.append(Enemy(int(item[1]),int(item[2]),int(item[3]),item[4],int(item[5]),item[6]))
             elif item[0] == 'Platform':
                 #x,y,w,h,path
                 self.platforms.append(Platform(int(item[1]),int(item[2]),int(item[3]),int(item[4]),item[5]))
@@ -43,6 +46,16 @@ class Game:
             
         for e in self.enemies:
             e.display()
+        
+        if self.vaderPush == True: #poor flying hero
+            print(self.cntVader)
+            self.hero.x -= 24
+            self.cntVader += 1
+            if self.cntVader == 20:
+                self.vaderPush = False
+                self.cntVader = 0
+                
+        
         self.hero.display()
         
             
@@ -116,35 +129,35 @@ class Hero(Npc):
             self.xy=0
             
         self.x+=self.xv    
-        self.y+=self.yv  
+        self.y+=self.yv 
+        
+        #going out of the screen
+        if self.x < 0 or self.x > game.w:
+            game.__init__()
+            game.create()
+            
         
         # collision
-        ctr=0
         for e in game.enemies:
             if self.distance(e) < self.r+e.r:
-            #-self.r so that enemy won't be killed if hit in the lower half
-                # if e.img=="vader.png":
-                #     if self.y-self.r > e.y and self.yv < 0:
-                #         while ctr!=3:
-                #             self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
-                #             self.killsound.play()
-                #             game.enemies.remove(e)
-                #             self.yv = 5
-                #             game.enemies.image(e)
-                #             crt+=1
-                #         del e
-                #     else:
-                #         game.__init__()
-                #         game.create()
-                        
+            #self.r so that enemy won't be killed if hit in the lower half                        
                 if self.y-self.r > e.y and self.yv < 0:
                     self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
                     self.killsound.play()
-                    game.enemies.remove(e)
-                    del e
-                    self.yv = 5
-                    game.scoretime += 10
-
+                    if e.type=="v" and game.vader != 0:
+                        game.vader-=1
+                        self.y += self.r
+                        self.yv = 4
+                        game.vaderPush = True
+                    elif e.type=='v' and game.vader==0:
+                        game.__init__()
+                        game.create()
+                    else:
+                        game.enemies.remove(e)
+                        del e
+                        self.yv = 5
+                        game.scoretime += 10
+    
                 else:
                     game.__init__()
                     game.create()
@@ -169,10 +182,10 @@ class Platform:
         image(self.img,self.x,game.h-self.y)
         
 class Enemy(Npc):
-    def __init__(self,x,y,r,imgName,g):
+    def __init__(self,x,y,r,imgName,g,type):
         Npc.__init__(self,x,y,r,imgName,g)
         self.xv = 2        
-        
+        self.type=type
     def update(self):
         if self.x+self.r >= game.w:
             self.xv=-2
