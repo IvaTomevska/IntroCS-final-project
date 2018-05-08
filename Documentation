@@ -1,7 +1,7 @@
 Docimentation
 
 03/05/18
-On the start play game should be pressed with the right click on the mouse.
+On the start play game should be pressed with the right click on the mouse, or just Enter on keyboard.
 The jump keys are Space, Up and W.
 The movig left keys are Left and A, for right are right and D.
 The Collision of the hero and the enemy is working: 
@@ -9,4 +9,14 @@ The Collision of the hero and the enemy is working:
   the hero looses when he touches the enemy from the side and the game terminates
 One platform so far is implemented succesfullt and the gravity on the platform works
 However, when the hero is under the platform the gravity doesn't work, it should be fixed
-Also, the gravity works but there are some problems, it should be completely redone.
+Also, the gravity works but there are some problems, it should be fixed.
+
+09/05/18
+Gravity fixed.
+Character groung adjusted.
+Platforms added and enemies which move on them and do not go down.
+Every enemy killed adds 10 points and after a while the points start to count down like time.
+If it comes to 0- the game is lost.
+Music added.
+Bakcground should be added.
+Vader specifications should be added (eg. dies after the 3 collision)
