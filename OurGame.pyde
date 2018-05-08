@@ -4,11 +4,14 @@ path=os.getcwd()
 
 class Game:
     def __init__(self):
-        self.w=500
+        self.w=1000
         self.h=700
         self.g=0
         self.state='start'
         self.platforms=[]
+        self.scoretime = 10
+        self.cnt = 0
+        #self.time = 5
         
     def create(self):
         self.enemies=[]
@@ -34,6 +37,18 @@ class Game:
         
         for p in self.platforms:
             p.display()
+            
+        if self.hero.y>2:#fix here for start of coutdown of time
+            self.cnt  = (self.cnt + 1)%60
+            if self.cnt == 0:
+                self.scoretime-=1
+            
+        fill(255)
+        text(str(self.scoretime), 20, 45)
+        #text(str(self.time), 20, 80)
+        if self.scoretime<=0:
+                game.__init__()
+                game.create()
         
 class Npc:
     def __init__(self,x,y,r,imgName,g):
@@ -104,6 +119,7 @@ class Hero(Npc):
                     game.enemies.remove(e)
                     del e
                     self.vy = 4
+                    game.scoretime += 10
                 else:
                     game.__init__()
                     game.create()
