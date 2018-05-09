@@ -12,11 +12,14 @@ class Game:
         self.g=0
         self.state='start'
         self.platforms=[]
-        self.scoretime = 10
+        self.scoretime = 5
         self.cnt = 0
         self.vader = 3 # how many time before Vader is killed
         self.vaderPush = False
         self.cntVader = 0
+        self.win="You won!\nbut you've also killed your father :("
+        self.loss="You lost.\nThe Empire really stroke back."
+        self.startText="In a galaxy far, far away\nin alternative Star Wars\nuniverse Luke found himself\nstuck on some clouds.\nThe only way for him to\nescape is to beat Darth Vader\nwho's standing above.\nHint: You better start killing\nthose stormtroopers."
         
     def create(self):
         self.enemies=[]
@@ -36,8 +39,8 @@ class Game:
         resources.close()
         
         self.soundtrack=minim.loadFile (path+"\\resources\\Soundtrack.mp3",2048)
-        self.soundtrack.play() 
         self.bgmusic=minim.loadFile (path+"\\resources\\Background.mp3",2048)
+        self.soundtrack.play() 
     
         
     def display(self):
@@ -68,8 +71,8 @@ class Game:
         text(str(self.scoretime), 20, 45)
         #text(str(self.time), 20, 80)
         if self.scoretime<=0:
-                game.__init__()
-                game.create()
+                game.state='loss'
+                game.h=700
         
 class Npc:
     def __init__(self,x,y,r,imgName,g):
@@ -113,58 +116,59 @@ class Hero(Npc):
         self.keyHandler={LEFT:False,RIGHT:False,UP:False,65:False,68:False,87:False,32:False}
         
     def update(self):
-        self.gravity()
-        
-        if self.keyHandler[LEFT] or self.keyHandler[65]:
-            self.xv=-3
-        elif self.keyHandler[RIGHT] or self.keyHandler[68]:
-            self.xv=3
-        else:
-            self.xv=0
-        if (self.keyHandler[UP] or self.keyHandler[87] or self.keyHandler[32]) and self.yv >= 0 and self.jump<1:
-            self.yv=+10
-            self.jump+=1
+        if game.state=='game':
+            self.gravity()
             
-        else:
-            self.xy=0
+            if self.keyHandler[LEFT] or self.keyHandler[65]:
+                self.xv=-3
+            elif self.keyHandler[RIGHT] or self.keyHandler[68]:
+                self.xv=3
+            else:
+                self.xv=0
+            if (self.keyHandler[UP] or self.keyHandler[87] or self.keyHandler[32]) and self.yv >= 0 and self.jump<1:
+                self.yv=+10
+                self.jump+=1
+                
+            else:
+                self.xy=0
+                
+            self.x+=self.xv    
+            self.y+=self.yv 
             
-        self.x+=self.xv    
-        self.y+=self.yv 
-        
-        #going out of the screen
-        if self.x < 0 or self.x > game.w:
-            game.__init__()
-            game.create()
+            #going out of the screen
+            if self.x < 0 or self.x > game.w:
+                game.state='loss'
+                game.h=700
+                
             
+            # collision
+            for e in game.enemies:
+                if self.distance(e) < self.r+e.r:
+                #self.r so that enemy won't be killed if hit in the lower half                        
+                    if self.y-self.r > e.y and self.yv < 0:
+                        self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
+                        self.killsound.play()
+                        if e.type=="v" and game.vader != 1:
+                            game.vader-=1
+                            self.y += self.r
+                            self.yv = 4
+                            game.vaderPush = True
+                        elif e.type=='v' and game.vader==1:
+                            game.state='win'
+                            game.h=700
+                        else:
+                            game.enemies.remove(e)
+                            del e
+                            self.yv = 5
+                            game.scoretime += 7
         
-        # collision
-        for e in game.enemies:
-            if self.distance(e) < self.r+e.r:
-            #self.r so that enemy won't be killed if hit in the lower half                        
-                if self.y-self.r > e.y and self.yv < 0:
-                    self.killsound=minim.loadFile (path+"\\resources\\Lightsaber.mp3",2048)
-                    self.killsound.play()
-                    if e.type=="v" and game.vader != 0:
-                        game.vader-=1
-                        self.y += self.r
-                        self.yv = 4
-                        game.vaderPush = True
-                    elif e.type=='v' and game.vader==0:
-                        game.__init__()
-                        game.create()
                     else:
-                        game.enemies.remove(e)
-                        del e
-                        self.yv = 5
-                        game.scoretime += 10
-    
-                else:
-                    game.__init__()
-                    game.create()
-                    
-        "moving in the middle"            
-        if self.y >= game.h//2 and self.y < game.stage_y_end-game.h//2:
-            game.h += self.yv
+                        game.state='loss'
+                        game.h=700
+                        
+            "moving in the middle"            
+            if self.y >= game.h//2 and self.y < game.stage_y_end-game.h//2:
+                game.h += self.yv
 
                     
     def distance(self,enemy):
@@ -187,19 +191,20 @@ class Enemy(Npc):
         self.xv = 2        
         self.type=type
     def update(self):
-        if self.x+self.r >= game.w:
-            self.xv=-2
-        elif self.x-self.r <= 0: 
-            self.xv=2
-        for p in game.platforms:
-            if self.y==p.y+1:
-                if self.x+self.r >= p.x+p.w:
-                    self.xv=-2
-                elif self.x-self.r <= p.x: 
-                    self.xv=2
-
-        self.x+=self.xv
-        self.y+=self.yv
+        if game.state=='game':
+            if self.x+self.r >= game.w:
+                self.xv=-2
+            elif self.x-self.r <= 0: 
+                self.xv=2
+            for p in game.platforms:
+                if self.y==p.y+1:
+                    if self.x+self.r >= p.x+p.w:
+                        self.xv=-2
+                    elif self.x-self.r <= p.x: 
+                        self.xv=2
+    
+            self.x+=self.xv
+            self.y+=self.yv
                   
     
 game=Game()
@@ -210,32 +215,54 @@ def setup():
     game.create()
     
 def draw():
-    textSize(40)
+    textSize(20)
+    fill(255,255,0)
+    background(0)
     if game.state=='start':
-        background(0)
-        if game.w//2.8<=mouseX<=game.w//2.8+130 and game.h//2-40<=mouseY<=game.h//2:
+        text(game.startText,500,250)
+        if game.w//5<=mouseX<=game.w//5+130 and game.h//2-40<=mouseY<=game.h//2:
             fill(255,255,100)
-        else:    
-            fill(255,255,0)
-        text('START',game.w//2.8,game.h//2)
-    if game.state=='game':
-        game.soundtrack.pause()
+        textSize(40)
+        text('START',game.w//5,game.h//2)
+    elif game.state=='game':
+        game.soundtrack.pause() 
         game.bgmusic.play()
-        background(0)
         game.display()
-
+    elif game.state=='win' or game.state=='loss':
+        if game.state=='win':
+            text(game.win,game.w//2,game.h//2.2)
+        elif game.state=='loss':
+            text(game.loss,game.w//2,game.h//2.2)
+        textSize(40)
+        if game.w//5<=mouseX<=game.w//5+260 and game.h//2-40<=mouseY<=game.h//2:
+            fill(255,255,100)
+        text('PLAY AGAIN',game.w//5,game.h//2)
+        
 
 def mouseClicked():
     if game.state=='start' \
-    and game.w//2.8<=mouseX<=game.w//2.8+130 and game.h//2-40<=mouseY<=game.h//2:
+    and game.w//5<=mouseX<=game.w//5+130 and game.h//2-40<=mouseY<=game.h//2:
         game.state='game'
+    elif game.state=='win' or game.state=='loss' \
+    and game.w//5<=mouseX<=game.w//5+260 and game.h//2-40<=mouseY<=game.h//2:
+        game.state='start'
+        game.bgmusic.pause()
+        game.__init__()
+        game.create()
         
 def keyPressed():
+    print(game.h)
     if game.state=='start' and keyCode==10:
        game.state='game'
        
     if game.state=='game':
         game.hero.keyHandler[keyCode]=True  
+    
+    if game.state=='win' or game.state=='loss'and keyCode==10:
+        game.state='start'
+        game.bgmusic.pause()
+        game.__init__()
+        game.create()
         
 def keyReleased():
     if game.state=='game':

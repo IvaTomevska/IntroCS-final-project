@@ -5,17 +5,21 @@ Enemy,350,0,50,resources\\enemy.png,0,e
  Enemy,150,451,50,resources\\enemy.png,0,e
  Enemy,570,651,50,resources\\enemy.png,0,e
  Enemy,100,801,50,resources\\enemy.png,0,e
- Enemy,750,1001,50,resources\\enemy.png,0,e
-Enemy,100,1201,50,resources\\enemy.png,0,e
-Enemy,500,1451,50,resources\\vader.png,0,v
+ Enemy,450,1051,50,resources\\enemy.png,0,e
+ Enemy,550,1251,50,resources\\enemy.png,0,e
+ Enemy,750,1501,50,resources\\enemy.png,0,e
+Enemy,100,1701,50,resources\\enemy.png,0,e
+Enemy,500,1951,50,resources\\vader.png,0,v
 
 ,x,y,w,h,picture
-Platform,500,1450,300,100,resources\\platform.png
-Platform,50,1200,300,100,resources\\platform.png
- Platform,600,1000,300,100,resources\\platform.png
+Platform,500,1950,300,100,resources\\platform.png
+Platform,50,1700,300,100,resources\\platform.png
+Platform,600,1500,300,100,resources\\platform.png
+ Platform,300,1250,300,100,resources\\platform.png
+ Platform,400,1050,300,100,resources\\platform.png
  Platform,100,800,300,100,resources\\platform.png
  Platform,500,650,300,100,resources\\platform.png
  Platform,50,450,300,100,resources\\platform.png
  Platform,500,250,300,100,resources\\platform.png
 ,,,,,
- End,2500,,,,
+ End,4000,,,,
