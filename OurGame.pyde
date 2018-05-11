@@ -9,6 +9,7 @@ class Game:
     def __init__(self):
         self.w=1000
         self.h=700
+        self.hh=700
         self.g=0
         self.state='start'
         self.platforms=[]
@@ -53,7 +54,6 @@ class Game:
             e.display()
         
         if self.vaderPush == True: #poor flying hero
-            print(self.cntVader)
             self.hero.x -= 24
             self.cntVader += 1
             if self.cntVader == 20:
@@ -74,7 +74,7 @@ class Game:
         #text(str(self.time), 20, 80)
         if self.scoretime<=0:
                 game.state='loss'
-                game.h=700
+                game.h=game.hh
                 
     def highscore(self):
             name=open(path+'\\resources\\highscore.csv','a')
@@ -86,7 +86,6 @@ class Game:
                 temp[0][1]=int(temp[0][1]) #lambda didn't work?
                 self.hscore+=temp
             self.hscore.sort(key=operator.itemgetter(1), reverse=True)
-            print(self.hscore)
             if len(self.hscore) >= 10:
                 self.bestTen=10
             else:
@@ -106,7 +105,6 @@ class Npc:
         self.jump=0
     
     def display(self):
-        #how to make it different for hero and enemies
         image(self.img,self.x-self.r,game.h-self.y-self.h,self.w,self.h,)
         self.update()
     
@@ -181,10 +179,11 @@ class Hero(Npc):
                     else:
                         game.state='loss'
                         
-            "moving in the middle"            
+            #"moving in the middle"            
             if self.y >= game.h//2 and self.y < game.stage_y_end-game.h//2:
                 game.h += self.yv
-
+            if self.y+self.yv < game.hh//2:
+                game.h = game.hh
                     
     def distance(self,enemy):
         return ((self.x-enemy.x)**2+(self.y-enemy.y)**2)**0.5        
@@ -244,7 +243,7 @@ def draw():
         game.bgmusic.play()
         game.display()
     elif game.state=='win' or game.state=='loss':
-        game.h=700
+        game.h=game.hh
         if game.state=='win':
             text(game.win,game.w//2,game.h//4)
         elif game.state=='loss':
@@ -278,7 +277,8 @@ def mouseClicked():
         game.create()
         
 def keyPressed():
-    print keyCode, key, type(key)
+    
+    print(game.hero.y, game.h, game.hero.yv)
     
     if game.state=='start' and keyCode==10:
        game.state='game'
@@ -292,8 +292,6 @@ def keyPressed():
         if keyCode==8:
             game.name=game.name[:-2]
         if keyCode == 10 and len(game.name)>1:
-            print(len(game.name))
-            print(game.name)
             game.highscore()
             game.state='highscore'
             
