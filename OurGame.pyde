@@ -1,6 +1,6 @@
 add_library('minim')
 
-import os
+import os, operator
 
 path=os.getcwd()
 minim=Minim(this);
@@ -20,7 +20,9 @@ class Game:
         self.win="You won!\nbut you've also killed your father :("
         self.loss="You lost.\nThe Empire really stroke back."
         self.startText="In a galaxy far, far away\nin alternative Star Wars\nuniverse Luke found himself\nstuck on some clouds.\nThe only way for him to\nescape is to beat Darth Vader\nwho's standing above.\nHint: You better start killing\nthose stormtroopers."
-        
+        self.name=''
+        self.hscore=[]
+         
     def create(self):
         self.enemies=[]
         resources = open(path+'\\resources\\state game'+'.csv','r')
@@ -73,6 +75,22 @@ class Game:
         if self.scoretime<=0:
                 game.state='loss'
                 game.h=700
+                
+    def highscore(self):
+            name=open(path+'\\resources\\highscore.csv','a')
+            name.write(game.name+','+str(game.scoretime)+'\n')
+            name.close()
+            name=open(path+'\\resources\\highscore.csv','r')
+            for i in name:
+                temp=[i.strip().split(',')]
+                temp[0][1]=int(temp[0][1]) #lambda didn't work?
+                self.hscore+=temp
+            self.hscore.sort(key=operator.itemgetter(1), reverse=True)
+            print(self.hscore)
+            if len(self.hscore) >= 10:
+                self.bestTen=10
+            else:
+                self.bestTen=len(self.hscore)
         
 class Npc:
     def __init__(self,x,y,r,imgName,g):
@@ -108,7 +126,7 @@ class Npc:
                 break
             else:
                 self.g=game.g
-            
+
         
 class Hero(Npc):
     def __init__(self,x,y,r,imgName,g):
@@ -137,9 +155,7 @@ class Hero(Npc):
             
             #going out of the screen
             if self.x < 0 or self.x > game.w:
-                game.state='loss'
-                game.h=700
-                
+                game.state='loss'                
             
             # collision
             for e in game.enemies:
@@ -154,8 +170,8 @@ class Hero(Npc):
                             self.yv = 4
                             game.vaderPush = True
                         elif e.type=='v' and game.vader==1:
+                            game.scoretime += 100
                             game.state='win'
-                            game.h=700
                         else:
                             game.enemies.remove(e)
                             del e
@@ -164,7 +180,6 @@ class Hero(Npc):
         
                     else:
                         game.state='loss'
-                        game.h=700
                         
             "moving in the middle"            
             if self.y >= game.h//2 and self.y < game.stage_y_end-game.h//2:
@@ -229,21 +244,33 @@ def draw():
         game.bgmusic.play()
         game.display()
     elif game.state=='win' or game.state=='loss':
+        game.h=700
         if game.state=='win':
-            text(game.win,game.w//2,game.h//2.2)
+            text(game.win,game.w//2,game.h//4)
         elif game.state=='loss':
-            text(game.loss,game.w//2,game.h//2.2)
+            text(game.loss,game.w//2,game.h//4)
+        text ('Enter your name (max 20 characters):',game.w//2,game.h//2)
+        text(game.name,game.w//2,game.h//1.5)
         textSize(40)
         if game.w//5<=mouseX<=game.w//5+260 and game.h//2-40<=mouseY<=game.h//2:
             fill(255,255,100)
         text('PLAY AGAIN',game.w//5,game.h//2)
-        
+    elif game.state=='highscore':
+        for i in range(game.bestTen):
+            text(game.hscore[i][0],game.w//2,300+i*30)   
+        for i in range(game.bestTen):
+            text(game.hscore[i][1],game.w-100,300+i*30)
+        textSize(40)
+        if game.w//5<=mouseX<=game.w//5+260 and game.h//2-40<=mouseY<=game.h//2:
+            fill(255,255,100)
+        text('PLAY AGAIN',game.w//5,game.h//2)
+        text('Best 10:',game.w//2,200)
 
 def mouseClicked():
     if game.state=='start' \
     and game.w//5<=mouseX<=game.w//5+130 and game.h//2-40<=mouseY<=game.h//2:
         game.state='game'
-    elif game.state=='win' or game.state=='loss' \
+    elif game.state=='win' or game.state=='loss' or game.state=='highscore'\
     and game.w//5<=mouseX<=game.w//5+260 and game.h//2-40<=mouseY<=game.h//2:
         game.state='start'
         game.bgmusic.pause()
@@ -251,18 +278,31 @@ def mouseClicked():
         game.create()
         
 def keyPressed():
-    print(game.h)
+    print keyCode, key, type(key)
+    
     if game.state=='start' and keyCode==10:
        game.state='game'
        
-    if game.state=='game':
+    elif game.state=='game':
         game.hero.keyHandler[keyCode]=True  
     
-    if game.state=='win' or game.state=='loss'and keyCode==10:
+    elif game.state=='win' or game.state=='loss':
+        if type(key) != int and keyCode != 10  and len(game.name) < 20:
+            game.name += key
+        if keyCode==8:
+            game.name=game.name[:-2]
+        if keyCode == 10 and len(game.name)>1:
+            print(len(game.name))
+            print(game.name)
+            game.highscore()
+            game.state='highscore'
+            
+    elif game.state=='highscore' and keyCode==10:    
         game.state='start'
         game.bgmusic.pause()
         game.__init__()
         game.create()
+        
         
 def keyReleased():
     if game.state=='game':
