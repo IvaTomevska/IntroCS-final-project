@@ -17,6 +17,9 @@ Character groung adjusted.
 Platforms added and enemies which move on them and do not go down.
 Every enemy killed adds 10 points and after a while the points start to count down like time.
 If it comes to 0- the game is lost.
-Music added.
-Bakcground should be added.
+Music and sound effects added.
 Vader specifications should be added (eg. dies after the 3 collision)
+
+11/05/18
+Hidhscores added
+Vader specifications added- he dies after 3 collisions with the hero.
